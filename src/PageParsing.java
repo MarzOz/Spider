@@ -13,14 +13,18 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.awt.*;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
 import com.google.gson.*;
 
+import javax.imageio.ImageIO;
+import javax.swing.*;
+
 public class PageParsing {
     public static String keyword;
-
+    public static JFrame frame = new JFrame("Comparator");
     public static void main(String[] args) throws IOException {
         String url = "https://www.google.com.tw";
         String amazon = "https://www.amazon.com/s?k=";
@@ -28,6 +32,12 @@ public class PageParsing {
         String momo = "https://www.momoshop.com.tw/search/searchShop.jsp?keyword=";
         String yahoo = "https://tw.buy.yahoo.com/search/product?p=";
 
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                createGUI();
+            }
+        });
 
         System.out.print("Search> ");
         Scanner scanner = new Scanner(System.in);
@@ -40,6 +50,37 @@ public class PageParsing {
         }
     }
 
+    private static void createGUI() {
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        frame.setBounds(0,0,400,800);
+
+        JPanel keyPnl = new JPanel(new BorderLayout());
+        JLabel keyLabel = new JLabel("Search: ");
+        JTextField searchField = new JTextField(20);
+//        searchField.setSize(new Dimension((int)(frame.getWidth()*0.8), 20));
+        keyPnl.setSize(frame.getWidth(), 50);
+
+        JButton searchBtn = new JButton();
+        ImageIcon img = new ImageIcon("search.png");
+        searchBtn.setIcon(img);
+
+        JPanel contentPane = new JPanel(new FlowLayout());
+        contentPane.setSize(new Dimension(frame.getWidth(), 300));
+        JPanel prodPnl[] = new JPanel[10];
+        searchBtn.setContentAreaFilled(false);
+
+//        searchBtn.setPreferredSize(new Dimension(100, 50));
+
+        keyPnl.add(keyLabel, BorderLayout.WEST);
+        keyPnl.add(searchField, BorderLayout.CENTER);
+        keyPnl.add(searchBtn, BorderLayout.EAST);
+
+//        frame.setLayout(new );
+        frame.add(keyPnl);
+        frame.add(contentPane);
+//        frame.pack();
+        frame.setVisible(true);
+    }
     private static String LAE(String url) throws IOException{
         WebClient webClient = new WebClient(BrowserVersion.CHROME);
         webClient.getOptions().setCssEnabled(false);
@@ -75,7 +116,6 @@ public class PageParsing {
         if (select == 1) {
 //            pchome
             Elements items = document.select("#ItemContainer dl");
-            Element a;
             for (i = 0; i < items.size(); i++) {
                 fw2.append("line " + i + ": " + items.get(i).toString() + "\n");
                 Element item = items.get(i);
@@ -100,18 +140,20 @@ public class PageParsing {
             for (i = 0; i < items.size(); i++){
                 fw2.append("line " + i + ": " + items.get(i).toString() + "\n");
                 Element item = items.get(i);
-                if ()
-                String name = item.select(".prdName").first().text();
-                fw3.write(name + "\n");
-                String price = item.select("span.price").text();
-                fw4.write(price + "\n");
-                String url = item.select(".goodsUrl").first().attr("href");
-                fw5.write("momoshop.com.tw"+url+"\n");
-                String thumbnail = item.select("div.swiper-wrapper img").first().attr("src");
-                fw6.write(thumbnail + "\n");
+                if (!item.hasClass("edmBG")) {
+                    String name = item.select(".prdName").first().text();
+                    fw3.write(name + "\n");
+                    String price = item.select("span.price").text();
+                    fw4.write(price + "\n");
+                    String url = item.select(".goodsUrl").first().attr("href");
+                    fw5.write("momoshop.com.tw" + url + "\n");
+                    String thumbnail = item.select("div.swiper-wrapper img").first().attr("src");
+                    fw6.write(thumbnail + "\n");
+                }
+                else
+                    continue;
             }
         }
-
         fw2.close();
         fw3.close();
         fw4.close();
