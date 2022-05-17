@@ -13,10 +13,13 @@ import org.jsoup.select.Elements;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.InputMismatchException;
 import java.util.LinkedList;
 import java.util.Scanner;
 import com.google.gson.*;
@@ -75,6 +78,7 @@ public class PageParsing {
         // search panel
         JPanel keyPnl = new JPanel(new BorderLayout());
         JLabel keyLabel = new JLabel("Search:  ");
+        keyLabel.setFont(new Font(keyLabel.getFont().toString(), Font.PLAIN, 16));
         JTextField searchField = new JTextField();
         keyPnl.setSize(frame.getWidth(), 50);
         // search button & setting icon
@@ -86,9 +90,23 @@ public class PageParsing {
         keyPnl.add(searchField, BorderLayout.CENTER);
         keyPnl.add(searchBtn, BorderLayout.EAST);
 
+        searchField.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if (e.getKeyChar() == '\n')
+                    searchBtn.doClick();
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) { }
+
+            @Override
+            public void keyReleased(KeyEvent e) { }
+        });
+
         // message panel
         JPanel msgPane = new JPanel();
-        JLabel msgLabel = new JLabel("This is a testing message. ;)");
+        JLabel msgLabel = new JLabel("This is a testing message, don't mind me! ;)");
         msgPane.add(msgLabel);
         msgPane.setBounds(0,50,frame.getWidth(),30);
         keyPnl.add(msgPane, BorderLayout.SOUTH);
@@ -109,6 +127,19 @@ public class PageParsing {
         }
         searchBtn.addActionListener(e -> new Thread(() -> {
             loading = true;
+
+//---------------------------------Still under construction----------------------------//
+//            try {
+                if ((keyword = searchField.getText()) == "") {
+                    System.out.println("Invalid input");
+                    msgLabel.setText("Oops! looks like you mistype something!");
+                    throw new InputMismatchException();
+                }else {
+                    System.out.println("hi there");
+                }
+//            }catch (InputMismatchException imEx) {
+//            }
+//-------------------------------------------------------------------------------------//
             new Thread(() -> {
                 while(loading) {
                     String loadingMsg = "Loading";
@@ -123,11 +154,12 @@ public class PageParsing {
                 }
             }).start();
 
-            keyword = searchField.getText();
+
             String name, price, url, thumb;
             boolean searched = false;
             numResult = 0;
             best_prod.clear();
+            // try to open keyword.data from storage.
             try {
                 FileReader fr = new FileReader(keyword+".data");
                 BufferedReader fin = new BufferedReader(fr);
@@ -141,6 +173,7 @@ public class PageParsing {
                 fr.close();
             } catch (FileNotFoundException FNFe) {
                 System.out.println("Previous result not found. Will Execute a new search.");
+                msgLabel.setText("Seems you search \""+keyword+"\" for the first time, hmm!");
             } catch (IOException ioEx) {
                 ioEx.printStackTrace();
             }
@@ -212,13 +245,16 @@ public class PageParsing {
 
                 numResult++;
             }
-            loading = false;
+//            loading = false;
             try {
                 sleep(2000);
                 msgLabel.setText("find " + numResult + " results");
                 results.close();
             } catch (InterruptedException ipEx) { }
             catch (IOException ex) { ex.printStackTrace();}
+            finally {
+                loading = false;
+            }
         }).start());
 
         JScrollPane scrollPane = new JScrollPane(listPane);
