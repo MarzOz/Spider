@@ -28,15 +28,18 @@ import static java.lang.Thread.sleep;
 public class PageParsing {
     private static final int PCHOME = 1;
     private static final int MOMO = 2;
-    private static final int AMAZON = 3;
+    private static final int YAHOO = 3;
+    private static final int AMAZON = 4;
 
     public static String keyword;
+
     public static JFrame frame = new JFrame("Comparator");
     static LinkedList<Product> best_prod = new LinkedList<>();
     static JPanel prodPnl[] = new JPanel[10];
     static JLabel prodList[][] = new JLabel[10][2];
     static JButton directBtn[] = new JButton[10];
     static JButton buyBtn[] = new JButton[10];
+
     static boolean loading = false;
     static int numResult;
 
@@ -48,9 +51,10 @@ public class PageParsing {
     public static void main(String[] args) throws IOException {
         String url = "https://www.google.com.tw";
 
+        // create a GUI thread.
         javax.swing.SwingUtilities.invokeLater(PageParsing::createGUI);
 
-
+/*
         System.out.print("Search> ");
         Scanner scanner = new Scanner(System.in);
         keyword = scanner.nextLine();
@@ -60,6 +64,7 @@ public class PageParsing {
         if(content != null) {
             parsing(content, 2);
         }
+*/
     }
 
     private static void createGUI() {
@@ -72,7 +77,7 @@ public class PageParsing {
         JLabel keyLabel = new JLabel("Search:  ");
         JTextField searchField = new JTextField();
         keyPnl.setSize(frame.getWidth(), 50);
-        // search button
+        // search button & setting icon
         JButton searchBtn = new JButton();
         ImageIcon img = new ImageIcon("search.png");
         searchBtn.setIcon(img);
@@ -83,7 +88,7 @@ public class PageParsing {
 
         // message panel
         JPanel msgPane = new JPanel();
-        JLabel msgLabel = new JLabel("This is a test");
+        JLabel msgLabel = new JLabel("This is a testing message. ;)");
         msgPane.add(msgLabel);
         msgPane.setBounds(0,50,frame.getWidth(),30);
         keyPnl.add(msgPane, BorderLayout.SOUTH);
@@ -153,6 +158,9 @@ public class PageParsing {
                         parsing(content, MOMO);
                 }
             } catch (IOException ioEx) {
+                loading = false;
+//                sleep(2000);
+                msgLabel.setText("Oops! Looks like somewhere goes wrong.");
                 ioEx.printStackTrace();
             }
             Desktop desktop = Desktop.getDesktop();
@@ -252,8 +260,6 @@ public class PageParsing {
         Document document = Jsoup.parse(content);
         fw1.write(document.toString());
         fw1.close();
-//        Elements items = document.select("#ItemContainer dl");
-//        Elements items = document.select(".listArea li");
         if (select == PCHOME) {
             Elements items = document.select("#ItemContainer dl");
             for (i = 0; i < items.size(); i++) {
@@ -289,10 +295,10 @@ public class PageParsing {
                     String price = item.select("span.price").text();
                     fw4.write(price + "\n");
                     String url = "https://www.momoshop.com.tw" + item.select(".goodsUrl").first().attr("href");
-//                    url = "https://www.momoshop.com.tw" + url;
                     fw5.write(url + "\n");
                     String thumbnail = item.select("div.swiper-wrapper img").first().attr("src");
                     fw6.write(thumbnail + "\n");
+
                     best_prod.add(new Product(name, url, price, thumbnail));
                 }
                 else
