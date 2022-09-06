@@ -1,3 +1,3 @@
 # Spider
 
-A simple web spider with GUI to fetch product info from `PChome` and `MOMO`
+A simple web spider with GUI to fetch product info from Taiwan E-commerce platform `PChome` and `MOMO`
